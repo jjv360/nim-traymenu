@@ -57,10 +57,16 @@ submenu.submenuItems.add(TrayMenuItem(title: "Subitem 2", isChecked: true))
 submenu.submenuItems.add(TrayMenuItem(title: "Subitem 3"))
 tray.contextMenu.add(submenu)
 
+# Hide the tray and then show it again after a few seconds
+proc hideAndShow() {.async.} =
+    tray.remove()
+    await sleepAsync(1000)
+    tray.show()
+
 # More menu items
 tray.contextMenu.add(TrayMenuItem(title: "Item 3"))
 tray.contextMenu.add(TrayMenuItem(isSeparator: true))
-tray.contextMenu.add(TrayMenuItem(title: "Hide", onClick: proc() = tray.hide()))
+tray.contextMenu.add(TrayMenuItem(title: "Hide", onClick: proc() = asyncCheck hideAndShow()))
 tray.contextMenu.add(TrayMenuItem(title: "Quit", onClick: proc() = quit()))
 
 
