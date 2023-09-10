@@ -199,7 +199,14 @@ class TrayMenu:
 
 
     ## Update the tray icon
-    method update() = this.show()
+    method update() = 
+    
+        # Stop if not visible
+        if this.hwnd == 0: 
+            return
+
+        # Update native tray again
+        this.updateNativeTray()
 
 
     ## Remove the tray icon

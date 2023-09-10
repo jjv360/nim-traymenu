@@ -70,7 +70,14 @@ tray.contextMenu.add(TrayMenuItem(title: "Hide", onClick: proc() = asyncCheck hi
 tray.contextMenu.add(TrayMenuItem(title: "Quit", onClick: proc() = quit()))
 
 
-
+# Continually update the tooltip and menu
+proc updateTooltip() {.async.} =
+    for i in 0 ..< int.high:
+        await sleepAsync(250)
+        tray.tooltip = "Nim - TrayMenu Test - " & $i
+        tray.contextMenu[0].title = "Nim - TrayMenu Test - " & $i
+        tray.update()
+asyncCheck updateTooltip()
 
 
 
