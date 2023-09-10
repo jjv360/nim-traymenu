@@ -5,6 +5,7 @@ import classes
 import winim/mean
 import pixie
 import ./menu
+import ./traymenu_base
 
 ## List of all active windows
 var activeHWNDs: Table[HWND, RootRef]
@@ -42,35 +43,13 @@ proc registerWindowClass(): string =
 
 
 ## Create a system tray icon
-class TrayMenu:
+class TrayMenu of TrayMenuBase:
 
     ## Tray icon
     var hIcon : HICON
 
     ## Tray window
     var hwnd : HWND
-
-    ## Tooltip
-    var tooltip = ""
-
-    ## Menu items
-    var contextMenu : seq[TrayMenuItem]
-
-    ## Callback when the tray icon is clicked
-    var onClick : proc() = nil
-
-    ## Callback when a menu item is clicked
-    var onMenuItemClick : proc(item : TrayMenuItem) = nil
-
-    ## Set menu icon from a file path
-    method loadIcon(path : string) =
-        
-        # Load file data
-        var data = readFile(path)
-
-        # Load image
-        this.loadIconFromData(data)
-
     
     ## Set menu icon from PNG data
     method loadIconFromData(data : string) =
@@ -191,6 +170,10 @@ class TrayMenu:
                 raiseLastError("Unable to update system tray icon.")
 
 
+    ## Check if supported on this playform
+    method supported() : bool = true
+
+
     ## Show the tray icon
     method show() =
 
@@ -309,12 +292,12 @@ class TrayMenu:
             raiseLastError("Unable to create menu item.")
 
 
-    ## Called to display the tray's menu
-    method openContextMenu() {.async.} =
+    ## Called to display the tray's menu and returns the clicked item
+    method openContextMenu() : Future[TrayMenuItem] {.async.} =
 
         # If no items, stop
         if this.contextMenu.len == 0:
-            return
+            return nil
 
         # Create menu
         let hMenu = CreatePopupMenu()
@@ -384,7 +367,7 @@ class TrayMenu:
         # Stop if not found
         if clickedItem == nil:
             echo "Unable to find selected menu item."
-            return
+            return nil
 
         # Call our onClick handler
         if this.onMenuItemClick != nil:
@@ -393,6 +376,9 @@ class TrayMenu:
         # Call it's onClick handler
         if clickedItem.onClick != nil:
             clickedItem.onClick()
+
+        # Return the clicked item
+        return clickedItem
 
         
 

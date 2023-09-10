@@ -22,4 +22,8 @@ tray.contextMenu.add(TrayMenuItem(title: "Hello World", onClick: proc() = echo "
 drain(int.high)
 ```
 
+> **Note:** The `show()` function may fail if dependent libraries are not available on the system, or if the current desktop environment doesn't support system tray icons. You can wrap it with a try/catch to handle this. It uses the WinAPI on Windows, and 
+
+> **Note:** On linux you'll need the DBus dev package, which you can get with `sudo apt install libdbus-1-dev`
+
 See the [example](./tests/test_tray.nim) for more information.

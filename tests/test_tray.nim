@@ -1,12 +1,15 @@
 import std/os
 import std/asyncdispatch
-import stdx/dynlib
-import winim/lean
 import ../src/traymenu
 
 
-## Useful functions from uxtheme.dll
+## Enhancements on Windows
 when defined(windows):
+
+    import winim/lean
+    import stdx/dynlib
+
+    # Useful imports from uxtheme.dll
     dynamicImport("uxtheme.dll"):
 
         ## Preferred app modes
@@ -19,11 +22,6 @@ when defined(windows):
 
         ## Set the preferred app mode, mainly changes context menus
         proc SetPreferredAppMode(mode : PreferredAppMode) {.stdcall, winapiOrdinal:135, winapiVersion: "10.0.17763".}
-
-
-
-# Windows enhancements
-when defined(windows):
 
     # Enable High DPI mode to prevent blurry UI
     SetProcessDPIAware()
@@ -43,7 +41,13 @@ tray.tooltip = "Nim - TrayMenu Test"
 tray.loadIconFromData(trayIcon)
 tray.onClick = proc() = echo "Tray clicked!"
 tray.onMenuItemClick = proc(item : TrayMenuItem) = echo "Menu item clicked: ", item.title
-tray.show()
+
+# Show if supported
+if tray.supported:
+    tray.show()
+else:
+    echo "TrayMenu not supported on this platform!"
+    quit(1)
 
 # Create tray menu items
 tray.contextMenu.add(TrayMenuItem(title: "Nim - TrayMenu Test", isDisabled: true))
