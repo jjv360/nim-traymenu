@@ -7,19 +7,32 @@ import stdx/dynlib
 type gint* = int
 type gboolean* = distinct gint
 type gssize* = int
+type guint32* = uint32
+type GQuark* = guint32
 type GObject* = pointer
 type GInputStream* = GObject
 type GDestroyNotify* = proc(data : pointer) {.cdecl.}
 type GtkStatusIcon* = GObject
 type GdkPixbuf* = GObject
 
+## Error
+type GErrorStruct* {.pure.} = object
+
+    ## Error domain, e.g. G_FILE_ERROR.
+    domain* : GQuark
+
+    ## Error code, e.g. G_FILE_ERROR_NOENT.
+    code* : gint
+
+    ## Human-readable informative error message.
+    message : cstring
+
+## Pointer to an error
+type GError* = ptr GErrorStruct
+
 
 ## Import functions from libgtk ang libgdk
 ## From: https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-TrialUse/LSB-TrialUse/gtk3libraries.html
-## 
-## Note: I keep reading everywhere that this method of creating tray icons is deprecated, but I can't find any other cross-platform way!
-## Come on, linux, get your shit together. Or maybe I just don't understand enough of it...
-## 
 dynamicImport("libgtk-3.so.0"):
 
     ## This function does the same work as gtk_init() with only a single change: It does not terminate the program if the commandline arguments couldn’t be parsed or the windowing system can’t be initialized. Instead it returns FALSE on failure.
@@ -51,7 +64,7 @@ dynamicImport("libgtk-3.so.0"):
 dynamicImport("libgdk-3.so.0"):
 
     ## Creates a new pixbuf by loading an image from an input stream.
-    proc gdk_pixbuf_new_from_stream*(stream : GInputStream, cancellable : pointer = nil, error : pointer = nil) : GdkPixbuf {.cdecl.}
+    proc gdk_pixbuf_new_from_stream*(stream : GInputStream, cancellable : pointer = nil, error : ptr GError = nil) : GdkPixbuf {.cdecl.}
 
 
 

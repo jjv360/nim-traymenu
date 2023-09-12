@@ -1,6 +1,5 @@
 import std/asyncdispatch
 import classes
-import dbus
 import ./menu
 import ./traymenu_base
 import ./gtk3
@@ -9,7 +8,7 @@ import ./gtk3
 ## The state of tray icons in Linux is UNBELIEVABLE. There are multiple methods of doing this and they all have issues.
 ## Here's a nice article about it: https://blog.tingping.se/2019/09/07/how-to-design-a-modern-status-icon.html
 ## 
-## So... I'll only support StatusNotifier for now. Kill me.
+## So... I'll only support GtkStatusIcon for now. Kill me.
 ## 
 
 
@@ -51,7 +50,7 @@ class TrayMenu of TrayMenuBase:
 
         # Set icon from pixbuf
         echo "Icon: ", this.statusIcon.repr, " Pixbuf: ", icon.repr
-        # this.statusIcon.set_from_pixbuf(icon)
+        this.statusIcon.set_from_pixbuf(icon)
 
         # Unref resources we aren't using any more
         inputStream.unref()
@@ -60,10 +59,6 @@ class TrayMenu of TrayMenuBase:
 
     ## Show the tray icon
     method show() =
-
-        # Get session bus
-        let bus = getBus(dbus.DBUS_BUS_SESSION)
-
 
         # Update icon
         this.update()
@@ -81,6 +76,7 @@ class TrayMenu of TrayMenuBase:
 
         # Hide icon
         this.statusIcon.set_visible(false)
+
 
     ## Called to display the tray's menu
     method openContextMenu() : Future[TrayMenuItem] {.async.} = 

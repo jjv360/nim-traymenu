@@ -11,11 +11,11 @@ when defined(windows):
     import ./traymenu/windows
     export windows
 
-elif defined(linux):
+# elif defined(linux):
 
-    # Linux specific stuff
-    import ./traymenu/linux
-    export linux
+#     # Linux specific stuff
+#     import ./traymenu/linux
+#     export linux
     
 else:
 
