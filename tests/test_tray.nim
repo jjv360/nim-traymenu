@@ -55,7 +55,7 @@ tray.contextMenu.add(TrayMenuItem(isSeparator: true))
 tray.contextMenu.add(TrayMenuItem(title: "Item 1"))
 
 # Submenu
-var submenu = TrayMenuitem(title: "Item 2")
+var submenu = TrayMenuItem(title: "Item 2")
 submenu.submenuItems.add(TrayMenuItem(title: "Subitem 1"))
 submenu.submenuItems.add(TrayMenuItem(title: "Subitem 2", isChecked: true))
 submenu.submenuItems.add(TrayMenuItem(title: "Subitem 3"))

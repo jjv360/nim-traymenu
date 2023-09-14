@@ -1,6 +1,7 @@
-import stdx/winlean
 import std/tables
 import stdx/asyncdispatch
+import stdx/os
+import std/oserrors
 import classes
 import winim/mean
 import pixie
@@ -60,7 +61,7 @@ class TrayMenu of TrayMenuBase:
         # Resize to the system's desired icon size
         let width = GetSystemMetrics(SM_CXSMICON)
         let height = GetSystemMetrics(SM_CYSMICON)
-        if width == 0 or height == 0: raiseLastError("Unable to get system tray icon size.")
+        if width == 0 or height == 0: raiseOSError(osLastError(), "Unable to get system tray icon size.")
         if width != image.width or height != image.height:
             image = image.resize(width, height)
 
@@ -80,17 +81,17 @@ class TrayMenu of TrayMenuBase:
         # Create color bitmap
         iconInfo.hbmColor = CreateBitmap(image.width.int32, image.height.int32, 1, 32, imgDataARGB[0].addr)
         if iconInfo.hbmColor == 0:
-            raiseLastError("Unable to create bitmap for tray icon.")
+            raiseOSError(osLastError(), "Unable to create bitmap for tray icon.")
 
         # Create blank bitmask bitmap
         iconInfo.hbmMask = CreateCompatibleBitmap(GetDC(0), image.width.int32, image.height.int32)
         if iconInfo.hbmMask == 0:
-            raiseLastError("Unable to create mask bitmap for tray icon.")
+            raiseOSError(osLastError(), "Unable to create mask bitmap for tray icon.")
 
         # Create the icon
         let hIcon = CreateIconIndirect(iconInfo)
         if hIcon == 0:
-            raiseLastError("Unable to create icon for system tray icon.")
+            raiseOSError(osLastError(), "Unable to create icon for system tray icon.")
 
         # Clean up
         DeleteObject(iconInfo.hbmColor)
@@ -127,7 +128,7 @@ class TrayMenu of TrayMenuBase:
             activeHWNDs[this.hwnd] = this
 
             # Start the windows event loop
-            asyncCheck startWindowsEventLoop()
+            asyncCheck startNativeEventLoop()
 
         # Setup notification data
         var data : NOTIFYICONDATAW
@@ -157,7 +158,7 @@ class TrayMenu of TrayMenuBase:
             # Add it
             let success = Shell_NotifyIconW(NIM_ADD, data)
             if success == 0:
-                raiseLastError("Unable to create system tray icon.")
+                raiseOSError(osLastError(), "Unable to create system tray icon.")
 
             # Update version
             Shell_NotifyIconW(NIM_SETVERSION, data)
@@ -167,7 +168,7 @@ class TrayMenu of TrayMenuBase:
             # Just update it
             let success = Shell_NotifyIconW(NIM_MODIFY, data)
             if success == 0:
-                raiseLastError("Unable to update system tray icon.")
+                raiseOSError(osLastError(), "Unable to update system tray icon.")
 
 
     ## Check if supported on this playform
@@ -210,7 +211,7 @@ class TrayMenu of TrayMenuBase:
         # Remove it
         let success = Shell_NotifyIconW(NIM_DELETE, data)
         if success == 0:
-            raiseLastError("Unable to remove system tray icon.")
+            raiseOSError(osLastError(), "Unable to remove system tray icon.")
 
         # Delete window
         DestroyWindow(this.hwnd)
@@ -289,7 +290,7 @@ class TrayMenu of TrayMenuBase:
         # Create menu item
         let success = InsertMenuItemW(parent, index.UINT, TRUE, menuItemInfo)
         if success == FALSE:
-            raiseLastError("Unable to create menu item.")
+            raiseOSError(osLastError(), "Unable to create menu item.")
 
 
     ## Called to display the tray's menu and returns the clicked item
@@ -302,7 +303,7 @@ class TrayMenu of TrayMenuBase:
         # Create menu
         let hMenu = CreatePopupMenu()
         if hMenu == FALSE:
-            raiseLastError("Unable to create popup menu.")
+            raiseOSError(osLastError(), "Unable to create popup menu.")
 
         # Get menu items
         for idx, menuItem in this.contextMenu:
@@ -312,7 +313,7 @@ class TrayMenu of TrayMenuBase:
         var cursorPos : POINT
         let winResult1 = GetCursorPos(cursorPos)
         if winResult1 == FALSE:
-            raiseLastError("Unable to get cursor position.")
+            raiseOSError(osLastError(), "Unable to get cursor position.")
 
         # Show menu in new thread
         var winResult2 : windef.WINBOOL = 0
@@ -345,7 +346,7 @@ class TrayMenu of TrayMenuBase:
 
             # Check for error
             if GetLastError() != 0:
-                raiseLastError()
+                raiseOSError(osLastError(), "Unable to open popup menu.")
 
             # Destroy the temporary window
             DestroyWindow(hwnd)
